@@ -1,79 +1,146 @@
 const road = document.getElementById("road");
-const car = document.getElementById("car");
+const player = document.getElementById("player");
 const scoreText = document.getElementById("score");
-const engine = document.getElementById("engine");
-const crash = document.getElementById("crash");
+const highScoreText = document.getElementById("highScore");
+const nitroText = document.getElementById("nitro");
+const engineSound = document.getElementById("engine");
+const crashSound = document.getElementById("crash");
+const bgMusic = document.getElementById("background");
+const pauseBtn = document.getElementById("pauseBtn");
+const resumeBtn = document.getElementById("resumeBtn");
 
-let carX = road.offsetWidth / 2 - 25;
+let playerLeft = 125;
 let score = 0;
 let speed = 4;
 let gameOver = false;
+let nitro = 100;
+let trafficInterval;
+let laneInterval;
 
-engine.play();
+// Load high score
+let highScore = localStorage.getItem("highScore") || 0;
+highScoreText.innerText = highScore;
 
-// Keyboard (PC)
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft") moveLeft();
-  if (e.key === "ArrowRight") moveRight();
+// Pause/Resume
+pauseBtn.onclick = () => {
+  gameOver = true;
+  pauseBtn.disabled = true;
+  resumeBtn.disabled = false;
+};
+resumeBtn.onclick = () => {
+  gameOver = false;
+  pauseBtn.disabled = false;
+  resumeBtn.disabled = true;
+  moveTraffic();
+  animateLane();
+};
+
+// Move player
+document.addEventListener("keydown", (e) => {
+  if (gameOver) return;
+
+  if (e.key === "ArrowLeft" && playerLeft > 0) playerLeft -= 25;
+  if (e.key === "ArrowRight" && playerLeft < 250) playerLeft += 25;
+
+  if (e.key.toLowerCase() === "n" && nitro > 0) {
+    speed += 5;
+    nitro -= 20;
+    if (nitro < 0) nitro = 0;
+    setTimeout(() => speed -= 5, 500);
+  }
+
+  player.style.left = playerLeft + "px";
+  nitroText.innerText = nitro + "%";
 });
 
-// Touch (Mobile)
-document.getElementById("left").onclick = moveLeft;
-document.getElementById("right").onclick = moveRight;
-
-function moveLeft() {
-  if (gameOver) return;
-  carX -= 30;
-  if (carX < 0) carX = 0;
-  car.style.left = carX + "px";
+// Lane animation
+function createLane() {
+  for (let i = 0; i < 10; i++) {
+    let lane = document.createElement("div");
+    lane.classList.add("lane");
+    lane.style.top = i * 60 + "px";
+    road.appendChild(lane);
+  }
 }
 
-function moveRight() {
-  if (gameOver) return;
-  carX += 30;
-  if (carX > road.offsetWidth - 50)
-    carX = road.offsetWidth - 50;
-  car.style.left = carX + "px";
+function animateLane() {
+  laneInterval = setInterval(() => {
+    if (gameOver) return;
+    document.querySelectorAll(".lane").forEach(lane => {
+      let top = parseInt(lane.style.top);
+      top += speed;
+      if (top > 500) top = -50;
+      lane.style.top = top + "px";
+    });
+  }, 30);
 }
 
-// Traffic
-setInterval(() => {
+// Traffic vehicles
+function createTrafficVehicle() {
   if (gameOver) return;
 
-  let enemy = document.createElement("div");
-  enemy.className = "enemy";
-  enemy.style.left = Math.random() * (road.offsetWidth - 50) + "px";
-  road.appendChild(enemy);
+  const vehicle = document.createElement("div");
+  vehicle.classList.add("enemy");
 
-  let y = -100;
-  let move = setInterval(() => {
-    if (gameOver) return clearInterval(move);
+  // Random type: car, truck, bus
+  let types = ["images/traffic-car.png", "images/truck.png", "images/bus.png"];
+  let type = types[Math.floor(Math.random() * types.length)];
+  vehicle.style.backgroundImage = `url(${type})`;
 
-    y += speed;
-    enemy.style.top = y + "px";
+  vehicle.style.left = Math.floor(Math.random() * 6) * 50 + "px";
+  road.appendChild(vehicle);
 
-    // Collision
+  let enemyTop = -100;
+
+  const moveEnemy = setInterval(() => {
+    if (gameOver) {
+      clearInterval(moveEnemy);
+      return;
+    }
+
+    enemyTop += speed;
+    vehicle.style.top = enemyTop + "px";
+
+    // Collision detection
     if (
-      y > road.offsetHeight - 120 &&
-      Math.abs(enemy.offsetLeft - carX) < 40
+      enemyTop > 330 &&
+      enemyTop < 420 &&
+      parseInt(vehicle.style.left) === playerLeft
     ) {
       endGame();
     }
 
-    if (y > road.offsetHeight) {
+    // Passed enemy
+    if (enemyTop > 500) {
       score++;
       scoreText.innerText = score;
-      enemy.remove();
-      clearInterval(move);
+      if (score % 5 === 0) speed += 0.5;
+      vehicle.remove();
+      clearInterval(moveEnemy);
     }
   }, 20);
-}, 1200);
+}
 
-// End Game
+function moveTraffic() {
+  trafficInterval = setInterval(createTrafficVehicle, 1200);
+}
+
+// End game
 function endGame() {
   gameOver = true;
-  engine.pause();
-  crash.play();
-  alert("Game Over! Score: " + score);
-  location.reload();
+  engineSound.pause();
+  bgMusic.pause();
+  crashSound.play();
+
+  if (score > highScore) localStorage.setItem("highScore", score);
+
+  setTimeout(() => {
+    alert("💥 CRASH! Score: " + score);
+    location.reload();
+  }, 500);
 }
+
+// Initialize game
+createLane();
+animateLane();
+moveTraffic();
