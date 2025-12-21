@@ -8,7 +8,7 @@ car-game/
  │    ├── truck.png
  │    ├── bus.png
  │    └── lane.png
- ├── sounds/
- │    ├── crash.mp3
- │    ├── engine.mp3
- │    └── background.mp3
+ └── sounds/
+      ├── crash.mp3
+      ├── engine.mp3
+      └── background.mp3
