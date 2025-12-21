@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ultimate Race Car Game</title>
-
-  <!-- IMPORTANT FOR MOBILE FULLSCREEN -->
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
-
+  <title>Car Racing Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🏎️ Ultimate Race Car Game</h1>
-
-<div class="info">
-  <span>Score: <b id="score">0</b></span>
-  <span>High: <b id="highScore">0</b></span>
-  <span>Nitro: <b id="nitro">100%</b></span>
-</div>
+<h2>🏎️ Car Racing Game</h2>
+<p>Score: <span id="score">0</span></p>
 
 <div id="road">
-  <div id="player"></div>
+  <div id="car"></div>
 </div>
 
-<p class="help">Swipe ◀ ▶ to steer | Tap screen for Nitro</p>
+<!-- Mobile Controls -->
+<div id="controls">
+  <button id="left">⬅️</button>
+  <button id="right">➡️</button>
+</div>
 
-<audio id="engine" src="sounds/engine.mp3" loop autoplay></audio>
+<audio id="engine" src="sounds/engine.mp3" loop></audio>
 <audio id="crash" src="sounds/crash.mp3"></audio>
-<audio id="background" src="sounds/background.mp3" loop autoplay></audio>
 
 <script src="script.js"></script>
 </body>
