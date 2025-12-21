@@ -1,8 +1,3 @@
-* {
-  box-sizing: border-box;
-  touch-action: manipulation;
-}
-
 body {
   margin: 0;
   background: #111;
@@ -11,21 +6,10 @@ body {
   text-align: center;
 }
 
-h1 {
-  margin: 5px;
-  font-size: 20px;
-}
-
-.info {
-  display: flex;
-  justify-content: space-around;
-  font-size: 14px;
-}
-
 #road {
-  width: 100vw;
-  max-width: 400px;
-  height: 80vh;
+  width: 90vw;
+  max-width: 320px;
+  height: 70vh;
   background: #555;
   margin: auto;
   position: relative;
@@ -33,40 +17,32 @@ h1 {
   border: 3px solid white;
 }
 
-/* Player race car */
-#player {
+/* Player Car */
+#car {
   width: 50px;
   height: 90px;
-  background: url("images/player-car.png") center/cover no-repeat;
+  background: url("images/car.png") center/cover no-repeat;
   position: absolute;
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10;
 }
 
-/* Traffic vehicles */
+/* Traffic */
 .enemy {
   width: 50px;
   height: 90px;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background: url("images/traffic.png") center/cover no-repeat;
   position: absolute;
   top: -100px;
 }
 
-/* Lane lines */
-.lane {
-  width: 8px;
-  height: 50px;
-  background: url("images/lane.png") center/cover no-repeat;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0.7;
+#controls {
+  margin: 10px;
 }
 
-.help {
-  font-size: 12px;
-  margin: 5px;
+#controls button {
+  width: 80px;
+  height: 50px;
+  font-size: 20px;
 }
