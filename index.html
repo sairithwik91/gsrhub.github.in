@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Car Game</title>
+  <title>Endless Race Car Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🚗 My Car Game</h1>
-<p>Use Left & Right Arrow Keys</p>
+<h1>🚗 Endless Race Car Game</h1>
+
+<div class="info">
+  <p>Score: <span id="score">0</span></p>
+  <p>High Score: <span id="highScore">0</span></p>
+</div>
+
+<p>Use ⬅️ ➡️ Arrow Keys</p>
 
 <div id="road">
-  <div id="car"></div>
+  <div id="player"></div>
 </div>
 
 <script src="script.js"></script>
