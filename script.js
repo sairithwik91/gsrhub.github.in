@@ -5,35 +5,16 @@ const highScoreText = document.getElementById("highScore");
 const nitroText = document.getElementById("nitro");
 const engineSound = document.getElementById("engine");
 const crashSound = document.getElementById("crash");
-const bgMusic = document.getElementById("background");
-const pauseBtn = document.getElementById("pauseBtn");
-const resumeBtn = document.getElementById("resumeBtn");
 
 let playerLeft = 125;
 let score = 0;
 let speed = 4;
 let gameOver = false;
 let nitro = 100;
-let trafficInterval;
-let laneInterval;
 
 // Load high score
 let highScore = localStorage.getItem("highScore") || 0;
 highScoreText.innerText = highScore;
-
-// Pause/Resume
-pauseBtn.onclick = () => {
-  gameOver = true;
-  pauseBtn.disabled = true;
-  resumeBtn.disabled = false;
-};
-resumeBtn.onclick = () => {
-  gameOver = false;
-  pauseBtn.disabled = false;
-  resumeBtn.disabled = true;
-  moveTraffic();
-  animateLane();
-};
 
 // Move player
 document.addEventListener("keydown", (e) => {
@@ -43,52 +24,41 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight" && playerLeft < 250) playerLeft += 25;
 
   if (e.key.toLowerCase() === "n" && nitro > 0) {
-    speed += 5;
-    nitro -= 20;
+    speed += 5;           // Nitro speed boost
+    nitro -= 20;          // Reduce nitro
     if (nitro < 0) nitro = 0;
-    setTimeout(() => speed -= 5, 500);
+    setTimeout(() => speed -= 5, 500); // Nitro lasts 0.5s
   }
 
   player.style.left = playerLeft + "px";
   nitroText.innerText = nitro + "%";
 });
 
-// Lane animation
-function createLane() {
-  for (let i = 0; i < 10; i++) {
-    let lane = document.createElement("div");
-    lane.classList.add("lane");
-    lane.style.top = i * 60 + "px";
-    road.appendChild(lane);
-  }
+// Lane lines animation
+for (let i = 0; i < 10; i++) {
+  let lane = document.createElement("div");
+  lane.classList.add("lane");
+  lane.style.top = i * 60 + "px";
+  road.appendChild(lane);
 }
 
-function animateLane() {
-  laneInterval = setInterval(() => {
-    if (gameOver) return;
-    document.querySelectorAll(".lane").forEach(lane => {
-      let top = parseInt(lane.style.top);
-      top += speed;
-      if (top > 500) top = -50;
-      lane.style.top = top + "px";
-    });
-  }, 30);
-}
+setInterval(() => {
+  document.querySelectorAll(".lane").forEach(lane => {
+    let top = parseInt(lane.style.top);
+    top += speed;
+    if (top > 500) top = -50;
+    lane.style.top = top + "px";
+  });
+}, 30);
 
 // Traffic vehicles
-function createTrafficVehicle() {
+function createTraffic() {
   if (gameOver) return;
 
-  const vehicle = document.createElement("div");
-  vehicle.classList.add("enemy");
-
-  // Random type: car, truck, bus
-  let types = ["images/traffic-car.png", "images/truck.png", "images/bus.png"];
-  let type = types[Math.floor(Math.random() * types.length)];
-  vehicle.style.backgroundImage = `url(${type})`;
-
-  vehicle.style.left = Math.floor(Math.random() * 6) * 50 + "px";
-  road.appendChild(vehicle);
+  const enemy = document.createElement("div");
+  enemy.classList.add("enemy");
+  enemy.style.left = Math.floor(Math.random() * 6) * 50 + "px";
+  road.appendChild(enemy);
 
   let enemyTop = -100;
 
@@ -99,13 +69,13 @@ function createTrafficVehicle() {
     }
 
     enemyTop += speed;
-    vehicle.style.top = enemyTop + "px";
+    enemy.style.top = enemyTop + "px";
 
     // Collision detection
     if (
       enemyTop > 330 &&
       enemyTop < 420 &&
-      parseInt(vehicle.style.left) === playerLeft
+      parseInt(enemy.style.left) === playerLeft
     ) {
       endGame();
     }
@@ -114,24 +84,18 @@ function createTrafficVehicle() {
     if (enemyTop > 500) {
       score++;
       scoreText.innerText = score;
-      if (score % 5 === 0) speed += 0.5;
-      vehicle.remove();
+      if (score % 5 === 0) speed += 0.5; // Increase difficulty
+      enemy.remove();
       clearInterval(moveEnemy);
     }
   }, 20);
-}
-
-function moveTraffic() {
-  trafficInterval = setInterval(createTrafficVehicle, 1200);
 }
 
 // End game
 function endGame() {
   gameOver = true;
   engineSound.pause();
-  bgMusic.pause();
   crashSound.play();
-
   if (score > highScore) localStorage.setItem("highScore", score);
 
   setTimeout(() => {
@@ -140,7 +104,5 @@ function endGame() {
   }, 500);
 }
 
-// Initialize game
-createLane();
-animateLane();
-moveTraffic();
+// Generate traffic
+setInterval(createTraffic, 1200);
