@@ -1,41 +1,47 @@
+* {
+  box-sizing: border-box;
+  touch-action: manipulation;
+}
+
 body {
+  margin: 0;
   background: #111;
   color: white;
   font-family: Arial;
   text-align: center;
-  margin: 0;
+}
+
+h1 {
+  margin: 5px;
+  font-size: 20px;
 }
 
 .info {
   display: flex;
   justify-content: space-around;
-  max-width: 600px;
-  margin: auto;
-  align-items: center;
-  gap: 10px;
+  font-size: 14px;
 }
 
 #road {
-  width: 300px;
-  max-width: 90vw;  /* Responsive for mobile */
-  height: 500px;
+  width: 100vw;
+  max-width: 400px;
+  height: 80vh;
   background: #555;
-  margin: 20px auto;
+  margin: auto;
   position: relative;
   overflow: hidden;
-  border: 4px solid white;
+  border: 3px solid white;
 }
 
 /* Player race car */
 #player {
   width: 50px;
   height: 90px;
-  background-image: url("images/player-car.png");
-  background-size: cover;
-  background-repeat: no-repeat;
+  background: url("images/player-car.png") center/cover no-repeat;
   position: absolute;
-  bottom: 20px;
-  left: 125px;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
 }
 
@@ -51,28 +57,16 @@ body {
 
 /* Lane lines */
 .lane {
-  width: 10px;
+  width: 8px;
   height: 50px;
-  background-image: url("images/lane.png");
-  background-size: cover;
+  background: url("images/lane.png") center/cover no-repeat;
   position: absolute;
-  top: 0;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0.7;
 }
 
-/* Touch controls */
-#touchControls {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 10px auto;
-}
-
-#touchControls button {
-  width: 80px;
-  height: 50px;
-  font-size: 18px;
-  border-radius: 8px;
+.help {
+  font-size: 12px;
+  margin: 5px;
 }
