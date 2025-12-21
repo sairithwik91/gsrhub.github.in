@@ -1,33 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ultimate Endless Race Game</title>
+  <title>Ultimate Race Car Game</title>
+
+  <!-- IMPORTANT FOR MOBILE FULLSCREEN -->
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🏎️ Ultimate Endless Race Game</h1>
+<h1>🏎️ Ultimate Race Car Game</h1>
 
 <div class="info">
-  <p>Score: <span id="score">0</span></p>
-  <p>High Score: <span id="highScore">0</span></p>
-  <p>Nitro: <span id="nitro">100%</span></p>
-  <button id="pauseBtn">Pause</button>
-  <button id="resumeBtn" disabled>Resume</button>
+  <span>Score: <b id="score">0</b></span>
+  <span>High: <b id="highScore">0</b></span>
+  <span>Nitro: <b id="nitro">100%</b></span>
 </div>
-
-<p>Use ⬅️ ➡️ Arrow Keys or Touch Buttons | Press N for Nitro</p>
 
 <div id="road">
   <div id="player"></div>
 </div>
 
-<!-- Touch controls -->
-<div id="touchControls">
-  <button id="leftBtn">⬅️</button>
-  <button id="nitroBtn">⚡ Nitro</button>
-  <button id="rightBtn">➡️</button>
-</div>
+<p class="help">Swipe ◀ ▶ to steer | Tap screen for Nitro</p>
 
 <audio id="engine" src="sounds/engine.mp3" loop autoplay></audio>
 <audio id="crash" src="sounds/crash.mp3"></audio>
@@ -35,4 +30,4 @@
 
 <script src="script.js"></script>
 </body>
-</html>v
+</html>
