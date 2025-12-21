@@ -1,0 +1,14 @@
+car-game/
+ ├── index.html
+ ├── style.css
+ ├── script.js
+ ├── images/
+ │    ├── player-car.png
+ │    ├── traffic-car.png
+ │    ├── truck.png
+ │    ├── bus.png
+ │    └── lane.png
+ ├── sounds/
+ │    ├── crash.mp3
+ │    ├── engine.mp3
+ │    └── background.mp3
