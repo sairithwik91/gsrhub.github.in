@@ -6,141 +6,136 @@ const nitroText = document.getElementById("nitro");
 const engineSound = document.getElementById("engine");
 const crashSound = document.getElementById("crash");
 const bgMusic = document.getElementById("background");
-const pauseBtn = document.getElementById("pauseBtn");
-const resumeBtn = document.getElementById("resumeBtn");
-const leftBtn = document.getElementById("leftBtn");
-const rightBtn = document.getElementById("rightBtn");
-const nitroBtn = document.getElementById("nitroBtn");
 
-let playerLeft = 125;
+let roadWidth = road.offsetWidth;
+let playerX = roadWidth / 2 - 25;
 let score = 0;
 let speed = 4;
-let gameOver = false;
 let nitro = 100;
-let trafficInterval;
-let laneInterval;
+let gameOver = false;
 
-// Load high score
 let highScore = localStorage.getItem("highScore") || 0;
 highScoreText.innerText = highScore;
 
-// Pause/Resume
-pauseBtn.onclick = () => {
-  gameOver = true;
-  pauseBtn.disabled = true;
-  resumeBtn.disabled = false;
-};
-resumeBtn.onclick = () => {
-  gameOver = false;
-  pauseBtn.disabled = false;
-  resumeBtn.disabled = true;
-  moveTraffic();
-  animateLane();
+// Resize support
+window.onresize = () => {
+  roadWidth = road.offsetWidth;
 };
 
-// Keyboard controls
-document.addEventListener("keydown", (e) => {
-  if (gameOver) return;
-  handleMove(e.key);
+// KEYBOARD CONTROLS
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") moveLeft();
+  if (e.key === "ArrowRight") moveRight();
+  if (e.key === "n") useNitro();
 });
 
-// Touch button controls
-leftBtn.onclick = () => handleMove("ArrowLeft");
-rightBtn.onclick = () => handleMove("ArrowRight");
-nitroBtn.onclick = () => handleMove("n");
+// SWIPE CONTROLS
+let startX = 0;
+road.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
 
-// Move player function
-function handleMove(key) {
-  if (key === "ArrowLeft" && playerLeft > 0) playerLeft -= 25;
-  if (key === "ArrowRight" && playerLeft < 250) playerLeft += 25;
-  if (key.toLowerCase() === "n" && nitro > 0) {
-    speed += 5;
-    nitro -= 20;
-    if (nitro < 0) nitro = 0;
-    setTimeout(() => speed -= 5, 500);
-  }
-  player.style.left = playerLeft + "px";
+road.addEventListener("touchend", e => {
+  let endX = e.changedTouches[0].clientX;
+  let diff = endX - startX;
+
+  if (diff > 40) moveRight();
+  if (diff < -40) moveLeft();
+});
+
+// TAP FOR NITRO
+road.addEventListener("click", useNitro);
+
+// MOVEMENT FUNCTIONS
+function moveLeft() {
+  if (gameOver) return;
+  playerX -= 40;
+  if (playerX < 0) playerX = 0;
+  player.style.left = playerX + "px";
+}
+
+function moveRight() {
+  if (gameOver) return;
+  playerX += 40;
+  if (playerX > roadWidth - 50) playerX = roadWidth - 50;
+  player.style.left = playerX + "px";
+}
+
+function useNitro() {
+  if (nitro <= 0 || gameOver) return;
+  speed += 5;
+  nitro -= 20;
   nitroText.innerText = nitro + "%";
+  setTimeout(() => speed -= 5, 500);
 }
 
-// Lane animation
-function createLane() {
-  for (let i = 0; i < 10; i++) {
-    let lane = document.createElement("div");
-    lane.classList.add("lane");
-    lane.style.top = i * 60 + "px";
-    road.appendChild(lane);
-  }
+// LANE LINES
+for (let i = 0; i < 10; i++) {
+  let lane = document.createElement("div");
+  lane.className = "lane";
+  lane.style.top = i * 60 + "px";
+  road.appendChild(lane);
 }
 
-function animateLane() {
-  laneInterval = setInterval(() => {
-    if (gameOver) return;
-    document.querySelectorAll(".lane").forEach(lane => {
-      let top = parseInt(lane.style.top);
-      top += speed;
-      if (top > 500) top = -50;
-      lane.style.top = top + "px";
-    });
-  }, 30);
-}
+setInterval(() => {
+  document.querySelectorAll(".lane").forEach(l => {
+    let t = parseInt(l.style.top);
+    t += speed;
+    if (t > road.offsetHeight) t = -50;
+    l.style.top = t + "px";
+  });
+}, 30);
 
-// Traffic vehicles
-function createTrafficVehicle() {
+// TRAFFIC
+setInterval(() => {
   if (gameOver) return;
 
-  const vehicle = document.createElement("div");
-  vehicle.classList.add("enemy");
+  let enemy = document.createElement("div");
+  enemy.className = "enemy";
+  let types = ["traffic-car.png","truck.png","bus.png"];
+  enemy.style.backgroundImage =
+    `url(images/${types[Math.floor(Math.random()*types.length)]})`;
 
-  let types = ["images/traffic-car.png","images/truck.png","images/bus.png"];
-  vehicle.style.backgroundImage = `url(${types[Math.floor(Math.random()*types.length)]})`;
+  enemy.style.left = Math.floor(Math.random() * (roadWidth - 50)) + "px";
+  road.appendChild(enemy);
 
-  vehicle.style.left = Math.floor(Math.random()*6)*50 + "px";
-  road.appendChild(vehicle);
+  let y = -100;
+  let move = setInterval(() => {
+    if (gameOver) return clearInterval(move);
 
-  let enemyTop = -100;
+    y += speed;
+    enemy.style.top = y + "px";
 
-  const moveEnemy = setInterval(() => {
-    if (gameOver) {
-      clearInterval(moveEnemy);
-      return;
-    }
-
-    enemyTop += speed;
-    vehicle.style.top = enemyTop + "px";
-
-    if (enemyTop > 330 && enemyTop < 420 && parseInt(vehicle.style.left) === playerLeft) {
+    if (
+      y > road.offsetHeight - 120 &&
+      Math.abs(parseInt(enemy.style.left) - playerX) < 40
+    ) {
       endGame();
     }
 
-    if (enemyTop > 500) {
+    if (y > road.offsetHeight) {
       score++;
       scoreText.innerText = score;
       if (score % 5 === 0) speed += 0.5;
-      vehicle.remove();
-      clearInterval(moveEnemy);
+      enemy.remove();
+      clearInterval(move);
     }
   }, 20);
-}
+}, 1200);
 
-function moveTraffic() {
-  trafficInterval = setInterval(createTrafficVehicle, 1200);
-}
-
-// End game
+// GAME OVER
 function endGame() {
   gameOver = true;
   engineSound.pause();
   bgMusic.pause();
   crashSound.play();
-  if (score > highScore) localStorage.setItem("highScore", score);
+
+  if (score > highScore) {
+    localStorage.setItem("highScore", score);
+  }
+
   setTimeout(() => {
-    alert("💥 CRASH! Score: " + score);
+    alert("💥 GAME OVER\nScore: " + score);
     location.reload();
   }, 500);
 }
-
-// Initialize game
-createLane();
-animateLane();
-moveTraffic();
