@@ -9,10 +9,8 @@ body {
 .info {
   display: flex;
   justify-content: space-around;
-  max-width: 600px;
+  max-width: 500px;
   margin: auto;
-  align-items: center;
-  gap: 10px;
 }
 
 #road {
@@ -29,7 +27,7 @@ body {
 #player {
   width: 50px;
   height: 90px;
-  background-image: url("images/player-car.png");
+  background-image: url("racecar.png");
   background-size: cover;
   background-repeat: no-repeat;
   position: absolute;
@@ -38,10 +36,11 @@ body {
   z-index: 10;
 }
 
-/* Traffic vehicles */
+/* Traffic cars */
 .enemy {
   width: 50px;
   height: 90px;
+  background-image: url("traffic.png");
   background-size: cover;
   background-repeat: no-repeat;
   position: absolute;
@@ -52,7 +51,7 @@ body {
 .lane {
   width: 10px;
   height: 50px;
-  background-image: url("images/lane.png");
+  background-image: url("lane.png");
   background-size: cover;
   position: absolute;
   top: 0;
