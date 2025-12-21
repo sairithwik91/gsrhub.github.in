@@ -3,17 +3,21 @@ body {
   color: white;
   font-family: Arial;
   text-align: center;
+  margin: 0;
 }
 
 .info {
   display: flex;
   justify-content: space-around;
-  max-width: 400px;
+  max-width: 600px;
   margin: auto;
+  align-items: center;
+  gap: 10px;
 }
 
 #road {
   width: 300px;
+  max-width: 90vw;  /* Responsive for mobile */
   height: 500px;
   background: #555;
   margin: 20px auto;
@@ -26,19 +30,49 @@ body {
 #player {
   width: 50px;
   height: 90px;
-  background: red;
+  background-image: url("images/player-car.png");
+  background-size: cover;
+  background-repeat: no-repeat;
   position: absolute;
   bottom: 20px;
   left: 125px;
-  border-radius: 10px;
+  z-index: 10;
 }
 
 /* Traffic vehicles */
 .enemy {
   width: 50px;
   height: 90px;
-  background: blue;
+  background-size: cover;
+  background-repeat: no-repeat;
   position: absolute;
   top: -100px;
-  border-radius: 10px;
+}
+
+/* Lane lines */
+.lane {
+  width: 10px;
+  height: 50px;
+  background-image: url("images/lane.png");
+  background-size: cover;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.7;
+}
+
+/* Touch controls */
+#touchControls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 10px auto;
+}
+
+#touchControls button {
+  width: 80px;
+  height: 50px;
+  font-size: 18px;
+  border-radius: 8px;
 }
