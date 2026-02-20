@@ -1,108 +1,149 @@
-const road = document.getElementById("road");
-const player = document.getElementById("player");
-const scoreText = document.getElementById("score");
-const highScoreText = document.getElementById("highScore");
-const nitroText = document.getElementById("nitro");
-const engineSound = document.getElementById("engine");
-const crashSound = document.getElementById("crash");
+const gameArea = document.getElementById('gameArea');
+const playerCar = document.getElementById('playerCar');
+const startBtn = document.getElementById('startBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const highScoreDisplay = document.getElementById('highScoreDisplay');
 
-let playerLeft = 125;
+const crashSound = document.getElementById('crashSound');
+const pointSound = document.getElementById('pointSound');
+
+let keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
 let score = 0;
-let speed = 4;
-let gameOver = false;
-let nitro = 100;
+let speed = 5;
+let gameActive = false;
+let enemies = [];
+let roadLines = [];
 
-// Load high score
-let highScore = localStorage.getItem("highScore") || 0;
-highScoreText.innerText = highScore;
+const highScore = localStorage.getItem('highScore') || 0;
+highScoreDisplay.innerText = `High Score: ${highScore}`;
 
-// Move player
-document.addEventListener("keydown", (e) => {
-  if (gameOver) return;
+startBtn.addEventListener('click', startGame);
 
-  if (e.key === "ArrowLeft" && playerLeft > 0) playerLeft -= 25;
-  if (e.key === "ArrowRight" && playerLeft < 250) playerLeft += 25;
+// Mobile Controls
+document.getElementById('leftBtn').addEventListener('touchstart', () => keys.ArrowLeft = true);
+document.getElementById('leftBtn').addEventListener('touchend', () => keys.ArrowLeft = false);
 
-  if (e.key.toLowerCase() === "n" && nitro > 0) {
-    speed += 5;           // Nitro speed boost
-    nitro -= 20;          // Reduce nitro
-    if (nitro < 0) nitro = 0;
-    setTimeout(() => speed -= 5, 500); // Nitro lasts 0.5s
-  }
+document.getElementById('rightBtn').addEventListener('touchstart', () => keys.ArrowRight = true);
+document.getElementById('rightBtn').addEventListener('touchend', () => keys.ArrowRight = false);
 
-  player.style.left = playerLeft + "px";
-  nitroText.innerText = nitro + "%";
+document.getElementById('upBtn').addEventListener('touchstart', () => keys.ArrowUp = true);
+document.getElementById('upBtn').addEventListener('touchend', () => keys.ArrowUp = false);
+
+document.getElementById('downBtn').addEventListener('touchstart', () => keys.ArrowDown = true);
+document.getElementById('downBtn').addEventListener('touchend', () => keys.ArrowDown = false);
+
+function startGame() {
+    gameArea.innerHTML = '<div id="playerCar" class="car"></div>';
+    playerCar.style.left = '175px';
+    playerCar.style.top = '500px';
+    score = 0;
+    speed = 5;
+    enemies = [];
+    roadLines = [];
+    gameActive = true;
+
+    for (let i = 0; i < 8; i++) {
+        const line = document.createElement('div');
+        line.classList.add('roadLine');
+        line.style.top = `${i * 100}px`;
+        gameArea.appendChild(line);
+        roadLines.push(line);
+    }
+
+    setInterval(() => {
+        if (gameActive) createEnemy();
+    }, 1500);
+
+    requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener('keydown', e => {
+    if (keys[e.key] !== undefined) keys[e.key] = true;
 });
 
-// Lane lines animation
-for (let i = 0; i < 10; i++) {
-  let lane = document.createElement("div");
-  lane.classList.add("lane");
-  lane.style.top = i * 60 + "px";
-  road.appendChild(lane);
+document.addEventListener('keyup', e => {
+    if (keys[e.key] !== undefined) keys[e.key] = false;
+});
+
+function createEnemy() {
+    const enemy = document.createElement('div');
+    enemy.classList.add('enemy');
+    enemy.style.left = `${Math.floor(Math.random() * 350)}px`;
+    enemy.style.top = '-120px';
+    gameArea.appendChild(enemy);
+    enemies.push(enemy);
 }
 
-setInterval(() => {
-  document.querySelectorAll(".lane").forEach(lane => {
-    let top = parseInt(lane.style.top);
-    top += speed;
-    if (top > 500) top = -50;
-    lane.style.top = top + "px";
-  });
-}, 30);
-
-// Traffic vehicles
-function createTraffic() {
-  if (gameOver) return;
-
-  const enemy = document.createElement("div");
-  enemy.classList.add("enemy");
-  enemy.style.left = Math.floor(Math.random() * 6) * 50 + "px";
-  road.appendChild(enemy);
-
-  let enemyTop = -100;
-
-  const moveEnemy = setInterval(() => {
-    if (gameOver) {
-      clearInterval(moveEnemy);
-      return;
-    }
-
-    enemyTop += speed;
-    enemy.style.top = enemyTop + "px";
-
-    // Collision detection
-    if (
-      enemyTop > 330 &&
-      enemyTop < 420 &&
-      parseInt(enemy.style.left) === playerLeft
-    ) {
-      endGame();
-    }
-
-    // Passed enemy
-    if (enemyTop > 500) {
-      score++;
-      scoreText.innerText = score;
-      if (score % 5 === 0) speed += 0.5; // Increase difficulty
-      enemy.remove();
-      clearInterval(moveEnemy);
-    }
-  }, 20);
+function moveRoadLines() {
+    roadLines.forEach(line => {
+        let y = parseInt(line.style.top);
+        y += speed;
+        if (y > 600) y = -80;
+        line.style.top = `${y}px`;
+    });
 }
 
-// End game
+function moveEnemies() {
+    enemies.forEach((enemy, idx) => {
+        let y = parseInt(enemy.style.top);
+        y += speed;
+        enemy.style.top = `${y}px`;
+
+        if (y > 650) {
+            enemy.remove();
+            enemies.splice(idx, 1);
+            score += 10;
+            pointSound.play();
+        }
+
+        if (detectCollision(playerCar, enemy)) {
+            endGame();
+        }
+    });
+}
+
+function detectCollision(a, b) {
+    const rectA = a.getBoundingClientRect();
+    const rectB = b.getBoundingClientRect();
+    return !(
+        rectA.right < rectB.left ||
+        rectA.left > rectB.right ||
+        rectA.bottom < rectB.top ||
+        rectA.top > rectB.bottom
+    );
+}
+
 function endGame() {
-  gameOver = true;
-  engineSound.pause();
-  crashSound.play();
-  if (score > highScore) localStorage.setItem("highScore", score);
-
-  setTimeout(() => {
-    alert("💥 CRASH! Score: " + score);
-    location.reload();
-  }, 500);
+    crashSound.play();
+    gameActive = false;
+    alert(`Game Over!\nYour Score: ${score}`);
+    if (score > highScore) {
+        localStorage.setItem('highScore', score);
+        highScoreDisplay.innerText = `High Score: ${score}`;
+    }
+    startBtn.innerText = 'Restart Game';
 }
 
-// Generate traffic
-setInterval(createTraffic, 1200);
+function gameLoop() {
+    if (!gameActive) return;
+
+    // Move road
+    moveRoadLines();
+    moveEnemies();
+
+    // Player movement
+    let left = parseInt(playerCar.style.left);
+    let topPos = parseInt(playerCar.style.top);
+
+    if (keys.ArrowLeft && left > 0) playerCar.style.left = `${left - speed}px`;
+    if (keys.ArrowRight && left < 350) playerCar.style.left = `${left + speed}px`;
+    if (keys.ArrowUp && topPos > 0) playerCar.style.top = `${topPos - speed}px`;
+    if (keys.ArrowDown && topPos < 500) playerCar.style.top = `${topPos + speed}px`;
+
+    scoreDisplay.innerText = `Score: ${score}`;
+
+    // Increase speed every 500 points
+    if (score > 0 && score % 500 === 0) speed = Math.min(speed + 1, 12);
+
+    requestAnimationFrame(gameLoop);
+}
