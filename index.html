@@ -1,28 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ultimate Endless Race Game</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #555;
+        }
+        #gameArea {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            margin: 50px auto;
+            background: #555;
+            border: 4px solid #222;
+            overflow: hidden;
+        }
+        .car, .enemy {
+            position: absolute;
+            width: 50px;
+            height: 100px;
+            background-size: cover;
+        }
+        #playerCar {
+            background-image: url('https://i.imgur.com/OYp4C8g.png');
+        }
+        .enemy {
+            background-image: url('https://i.imgur.com/QZ6QVrQ.png');
+        }
+        .roadLine {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background: white;
+            left: 50%;
+            margin-left: -5px;
+        }
+        #scoreBoard {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<h1>🏎️ Ultimate Endless Race Game</h1>
-
-<div class="info">
-  <p>Score: <span id="score">0</span></p>
-  <p>High Score: <span id="highScore">0</span></p>
-  <p>Nitro: <span id="nitro">100%</span></p>
+<div id="scoreBoard">Score: 0</div>
+<div id="gameArea">
+    <div id="playerCar" class="car"></div>
 </div>
 
-<p>Use ⬅️ ➡️ Arrow Keys to steer | Press N for Nitro</p>
+<script>
+(() => {
+    const gameArea = document.getElementById('gameArea');
+    const playerCar = document.getElementById('playerCar');
+    const scoreBoard = document.getElementById('scoreBoard');
 
-<div id="road">
-  <div id="player"></div>
-</div>
+    let keys = {ArrowLeft: false, ArrowRight: false};
+    let player = {x: 175, y: 500, speed: 5};
+    let score = 0;
+    let gameSpeed = 5;
+    let enemies = [];
 
-<audio id="engine" src="engine.mp3" loop autoplay></audio>
-<audio id="crash" src="crash.mp3"></audio>
+    const roadLines = [];
 
-<script src="script.js"></script>
+    // Initialize road lines
+    for (let i = 0; i < 8; i++) {
+        const line = document.createElement('div');
+        line.classList.add('roadLine');
+        line.style.top = (i * 100) + 'px';
+        gameArea.appendChild(line);
+        roadLines.push(line);
+    }
+
+    // Enemy generation
+    function createEnemy() {
+        const enemy = document.createElement('div');
+        enemy.classList.add('enemy');
+        enemy.style.left = Math.floor(Math.random() * 350) + 'px';
+        enemy.style.top = '-120px';
+        gameArea.appendChild(enemy);
+        enemies.push(enemy);
+    }
+    setInterval(createEnemy, 1500);
+
+    // Key listeners
+    document.addEventListener('keydown', e => {
+        if (keys[e.key] !== undefined) keys[e.key] = true;
+    });
+    document.addEventListener('keyup', e => {
+        if (keys[e.key] !== undefined) keys[e.key] = false;
+    });
+
+    function moveRoadLines() {
+        roadLines.forEach(line => {
+            let top = parseInt(line.style.top);
+            top += gameSpeed;
+            if (top > 600) top = -80;
+            line.style.top = top + 'px';
+        });
+    }
+
+    function moveEnemies() {
+        enemies.forEach((enemy, index) => {
+            let top = parseInt(enemy.style.top);
+            top += gameSpeed;
+            enemy.style.top = top + 'px';
+
+            // Remove off screen enemies
+            if (top > 650) {
+                enemy.remove();
+                enemies.splice(index, 1);
+                score++;
+            }
+
+            // Collision detection
+            let playerRect = playerCar.getBoundingClientRect();
+            let enemyRect = enemy.getBoundingClientRect();
+            if (
+                playerRect.left < enemyRect.left + enemyRect.width &&
+                playerRect.left + playerRect.width > enemyRect.left &&
+                playerRect.top < enemyRect.top + enemyRect.height &&
+                playerRect.top + playerRect.height > enemyRect.top
+            ) {
+                endGame();
+            }
+        });
+    }
+
+    function endGame() {
+        alert(`Game Over! Your Score: ${score}`);
+        window.location.reload();
+    }
+
+    function gameLoop() {
+        moveRoadLines();
+        moveEnemies();
+
+        // Player movement
+        if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
+        if (keys.ArrowRight && player.x < 350) player.x += player.speed;
+        playerCar.style.left = player.x + 'px';
+
+        scoreBoard.innerText = "Score: " + score;
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Start
+    playerCar.style.left = player.x + 'px';
+    playerCar.style.top = player.y + 'px';
+    gameLoop();
+})();
+</script>
 </body>
 </html>
